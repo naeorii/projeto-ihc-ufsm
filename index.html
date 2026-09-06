@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avista — Fauna do campus UFSM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="mark">AV<em>i</em>STA</span>
+    <span class="tagline">· Fauna do campus da UFSM</span>
+  </div>
+  <div class="topsearch">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Buscar espécie, local...">
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" id="bellBtn" aria-label="Notificações">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <span class="dot"></span>
+    </button>
+    <button class="btn-new" id="openAddPost">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Novo avistamento</span>
+    </button>
+  </div>
+  <div class="notif-panel" id="notifPanel">
+    <h4>Notificações</h4>
+    <div class="notif-item"><b>Prof. Eduardo Konzen</b> confirmou a identificação do seu avistamento na frente do CT.<span class="time">há 2 h</span></div>
+    <div class="notif-item"><b>Sandra Oliveira</b> comentou no avistamento do Bosque Universitário.<span class="time">há 5 h</span></div>
+    <div class="notif-item"><b>Avista</b> — sua espécie do Jardim Botânico ainda aguarda identificação da comunidade.<span class="time">ontem</span></div>
+  </div>
+</header>
+
+<div class="shell">
+  <!-- Left rail -->
+  <nav class="rail" id="railNav">
+    <p class="rail-title">Explorar</p>
+    <div class="rail-item active"><span>▦</span><span>Todos</span></div>
+    <div class="rail-item"><span>○</span><span>Mamíferos</span></div>
+    <div class="rail-item"><span>○</span><span>Aves</span></div>
+    <div class="rail-item"><span>○</span><span>Répteis</span></div>
+    <div class="rail-item"><span>○</span><span>Anfíbios</span></div>
+    <div class="rail-item"><span>○</span><span>Insetos</span></div>
+    <div class="rail-sep"></div>
+    <div class="rail-item"><span>◷</span><span>Pendentes</span></div>
+  </nav>
+
+  <!-- Feed -->
+  <main>
+    <div class="feed-head">
+      <h1>Avistamentos recentes</h1>
+      <span id="countTag"></span>
+    </div>
+    <div id="feed">
+      <article class="post">
+        <div class="post-head"><div class="avatar">LM</div><div><div class="who">Larissa Menezes</div><div class="meta">25/08/2026 · Entorno do RU</div></div><span class="ribbon-tag" style="background:#3E6E80;">AVE</span></div>
+        <div class="photo-frame"><div class="display" style="font-size:64px; color:#565C4C;">♧</div></div>
+        <div class="post-body"><div class="species-row"><h3>João-de-barro</h3><span class="sci">Furnarius rufus</span><span class="badge confirmed">✓ identificado</span></div><div class="loc-line"><span>⌖ Entorno do RU</span><span>▣ 25/08/2026</span></div><p class="caption">Achei esse ninho de barro em cima do poste, e o dono não parava de cantar por perto!</p></div>
+        <div class="post-footer"><button>◌ 2 comentários</button><button style="margin-left:auto;">Ver conversa</button></div>
+      </article>
+      <article class="post">
+        <div class="post-head"><div class="avatar">SO</div><div><div class="who">Sandra Oliveira</div><div class="meta">24/08/2026 · Frente do CT</div></div><span class="ribbon-tag" style="background:#9C4A2E;">MAMÍFERO</span></div>
+        <div class="photo-frame"><div class="display" style="font-size:64px; color:#565C4C;">◒</div></div>
+        <div class="post-body"><div class="species-row"><h3>Capivara</h3><span class="sci">Hydrochoerus hydrochaeris</span><span class="badge confirmed">✓ identificado</span></div><div class="loc-line"><span>⌖ Frente do CT</span><span>▣ 24/08/2026</span></div><p class="caption">Uma família inteira pastando na beira da lagoa hoje de manhã, com filhotinhos pequenos!</p></div>
+        <div class="post-footer"><button>◌ 2 comentários</button><button style="margin-left:auto;">Ver conversa</button></div>
+      </article>
+      <article class="post">
+        <div class="post-head"><div class="avatar">TS</div><div><div class="who">Taiana dos Santos</div><div class="meta">22/08/2026 · Bosque da UFSM</div></div><span class="ribbon-tag" style="background:#A65D3A;">RÉPTIL</span></div>
+        <div class="photo-frame"><div class="display" style="font-size:64px; color:#565C4C;">⌁</div></div>
+        <div class="post-body"><div class="species-row"><h3>Espécie não identificada</h3><span class="badge pending">aguardando identificação</span></div><div class="loc-line"><span>⌖ Bosque da UFSM</span><span>▣ 22/08/2026</span></div><p class="caption">Vi esse bicho atravessando a trilha rapidinho, alguém sabe o que é? Tinha uns 40cm.</p></div>
+        <div class="post-footer"><button>◌ 1 comentário</button><button class="cta-help">Ajudar a identificar →</button></div>
+      </article>
+    </div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <h3>Nada por aqui ainda</h3>
+      <p>Tente outro filtro ou seja a primeira pessoa a registrar essa espécie.</p>
+    </div>
+  </main>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="side-card">
+      <h4>Mapa do campus</h4>
+      <div class="map-box" id="miniMap">
+        <svg viewBox="0 0 250 150" width="100%" height="140" aria-label="Mapa ilustrado do campus">
+          <rect width="250" height="150" fill="#EFE9D8"/>
+          <ellipse cx="70" cy="60" rx="46" ry="34" fill="#6E8F5A" opacity="0.35"/>
+          <ellipse cx="185" cy="100" rx="42" ry="28" fill="#3E6E80" opacity="0.35"/>
+          <rect x="120" y="30" width="34" height="24" fill="#9C4A2E" opacity="0.25"/>
+          <circle cx="70" cy="60" r="4" fill="#9C4A2E"/>
+          <circle cx="185" cy="100" r="4" fill="#3E6E80"/>
+          <circle cx="130" cy="38" r="4" fill="#6E8F5A"/>
+          <text x="70" y="98" font-size="8" fill="#565C4C" text-anchor="middle" font-family="IBM Plex Mono">Bosque</text>
+          <text x="185" y="126" font-size="8" fill="#565C4C" text-anchor="middle" font-family="IBM Plex Mono">Frente do CT</text>
+          <text x="130" y="20" font-size="8" fill="#565C4C" text-anchor="middle" font-family="IBM Plex Mono">Jd. Botânico</text>
+        </svg>
+      </div>
+    </div>
+    <div class="side-card">
+      <h4>Em números</h4>
+      <div class="stat-row"><span>Espécies catalogadas</span><b id="statSpecies">4</b></div>
+      <div class="stat-row"><span>Avistamentos publicados</span><b id="statPosts">6</b></div>
+      <div class="stat-row"><span>Aguardando identificação</span><b id="statPending">2</b></div>
+    </div>
+    <div class="side-card">
+      <h4>Precisam de ajuda</h4>
+      <div id="pendingList">
+        <div class="mini-post"><div class="m-av">TS</div><div><b>Réptil</b> em Bosque da UFSM<br><span style="color:var(--ink-soft)">Vi esse bicho atravessando a trilha...</span></div></div>
+        <div class="mini-post"><div class="m-av">HB</div><div><b>Ave</b> em Jardim Botânico<br><span style="color:var(--ink-soft)">Pássaro pequeno, cantando bem alto...</span></div></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<button class="fab" id="fabAdd" aria-label="Novo avistamento">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- Detail / thread modal -->
+<div class="overlay" id="detailOverlay"><div class="modal" id="detailModal"></div></div>
+
+<!-- New post modal -->
+<div class="overlay" id="addOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h2>Novo avistamento</h2><p>Compartilhe o que você viu no campus</p></div>
+      <button class="close-btn" id="closeAdd" aria-label="Fechar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="newPostForm">
+        <div class="upload-box upload-placeholder">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9C4A2E" stroke-width="1.8" style="margin-bottom:6px;"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16 L15 11 L6 19"/></svg>
+          <div>Adicionar uma foto</div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="ns-class">Classe</label>
+            <select id="ns-class">
+              <option value="mamifero">Mamífero</option>
+              <option value="ave">Ave</option>
+              <option value="reptil">Réptil</option>
+              <option value="anfibio">Anfíbio</option>
+              <option value="inseto">Inseto</option>
+            </select>
+          </div>
+          <div class="field"><label>Local no campus</label><div class="field-static">Bosque da UFSM</div><input id="ns-loc" type="hidden" value="Bosque da UFSM"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="ns-date">Data</label><input type="date" id="ns-date"></div>
+        </div>
+        <div class="field"><label for="ns-caption">O que você viu?</label>
+          <textarea id="ns-caption" placeholder="Descreva o comportamento, quantos indivíduos, etc."></textarea>
+        </div>
+        <p class="error-text" id="ns-error">Selecione a classe e informe o local antes de publicar.</p>
+        <div id="suggestArea"></div>
+        <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+          <button type="button" class="btn ghost" id="cancelAdd">Cancelar</button>
+          <button type="submit" class="btn primary" id="submitBtn">Publicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

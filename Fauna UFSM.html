@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fauna UFSM – Protótipo</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header id="hd"></header>
+  <main id="view" tabindex="-1"></main>
+  <nav aria-label="Navegação principal" id="nav"></nav>
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+<script>
+const CATS={Aves:'🐦',Mamíferos:'🐾',Répteis:'🦎',Anfíbios:'🐸',Insetos:'🦋',Aracnídeos:'🕷️'};
+const HUE={Aves:'#CFE3F2',Mamíferos:'#EBD9C4',Répteis:'#D4E6C3',Anfíbios:'#C9E8DD',Insetos:'#F1DDE9',Aracnídeos:'#E7E7E7'};
+const PLACES=['Bosque da UFSM','RU I','Gramado da Reitoria','Restaurante Universitário','Biblioteca Central','Estacionamento do CT'];
+const SP=[
+{id:1,n:'Quero-quero',s:'Vanellus chilensis',c:'Aves',e:'🐦',info:'Ave territorial, ruidosa, ninha no chão. Defende o ninho com voos rasantes.',onde:'Gramados e áreas abertas',com:[{u:'Marina',t:'Tem um casal perto do CT, com ninho!'}],q:[{u:'Lucas',t:'Posso me aproximar do ninho?',a:'Prefira observar a mais de 10 m para não estressar as aves.'}]},
+
+
+{id:2,n:'Capivara',s:'Hydrochoerus hydrochaeris',c:'Mamíferos',e:'🦫',info:'Maior roedor do mundo. Vive em grupos perto de água e é ativa ao amanhecer e entardecer.',onde:'Lago e áreas alagadiças',com:[],q:[{u:'Ana',t:'Elas oferecem risco a quem passa?',a:''}]},
+{id:3,n:'Coruja-buraqueira',s:'Athene cunicularia',c:'Aves',e:'🦉',info:'Ave de hábitos diurnos e noturnos, nidifica em buracos no solo.',onde:'Gramados abertos',com:[{u:'Rafael',t:'Vi duas filhotes na entrada da toca.'}],q:[]},
+{id:4,n:'Lagartixa',s:'Hemidactylus mabouia',c:'Répteis',e:'🦎',info:'Lagartixa pequena e muito ágil, costuma se esconder em frestas e paredes. Não é peçonhenta e ajuda a controlar insetos.',onde:'Mata e bordas de trilha',com:[],q:[{u:'Taiana',t:'É perigoso para cães?',a:'Costuma evitar confronto, mas pode morder se encurralada.'}]},
+{id:5,n:'Gambá-de-orelha-branca',s:'Didelphis albiventris',c:'Mamíferos',e:'🐭',info:'Marsupial noturno e onívoro, importante dispersor de sementes.',onde:'Mata e lixeiras',com:[],q:[]},
+{id:6,n:'Sapo-cururu',s:'Rhinella icterica',c:'Anfíbios',e:'🐸',info:'Anfíbio de pele rugosa que libera toxina pelas glândulas parotoides. Evite manusear.',onde:'Áreas úmidas e jardins',com:[],q:[]},
+{id:7,n:'Aranha',s:'Araneidae',c:'Aracnídeos',e:'🕷️',info:'Aranha de teia grande, geralmente predadora e ativa em diferentes horários do dia.',onde:'Plantas e espaços internos',com:[],q:[]}];
+let FEED=[{sp:2,u:'Taiana',p:'Lago da UFSM',t:'há 18 min',likes:5,liked:false,note:'Vi uma capivara junto à margem da água.'},
+{sp:1,u:'Marina',p:'Estacionamento do CT',t:'há 2 h',likes:7,liked:false,note:''},
+{sp:4,u:'Rafael',p:'RU I',t:'ontem',likes:9,liked:false,note:'Estava em uma parede próxima à trilha.'},
+{sp:7,u:'Higor',p:'Bosque da UFSM',t:'há 20 min',likes:12,liked:false,note:'Acabei de ver uma aranha no bosque.'}];
+const S={tab:'home',filter:'Todos',cat:'',q:'',detail:null,dtab:'com',replying:null,reg:{foto:false,sp:'',p:'',note:''},touched:false,qaf:'Todas'};
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sp=id=>SP.find(x=>x.id==id);
+let timer,undo=null;
+function toast(msg,action){clearTimeout(timer);$('#toast').innerHTML=`<div class="toast"><span>${msg}</span>${action?`<button data-a="undo">Desfazer</button>`:''}</div>`;timer=setTimeout(()=>$('#toast').innerHTML='',5000)}
+function go(tab,d){S.tab=tab;S.detail=d||null;if(d)S.dtab=tab==='qa'?'q':'com';render();$('#view').scrollTop=0;$('#view').focus()}
+
+function photo(s,h){if(!s)return `<div class="photo" style="background:#DDE7D7;${h?`height:${h}px`:''}" role="img" aria-label="Foto de espécie não identificada">❔</div>`;return `<div class="photo" style="background:${HUE[s.c]};${h?`height:${h}px`:''}" role="img" aria-label="Foto de ${esc(s.n)}">${s.e}</div>`}
+function feedCard(f,i){const s=sp(f.sp),unknown=!s;return `<article class="card">${photo(s)}<div class="body"><div class="row"><h3 style="flex:1">${unknown?'Espécie não identificada':s.n}</h3><span class="badge">${unknown?'Aguardando identificação da comunidade':s.c}</span></div>
+<div class="meta">${esc(f.p)} · ${f.t} · por ${esc(f.u)}</div>${f.note?`<p style="margin:8px 0 0">${esc(f.note)}</p>`:''}
+<div class="row" style="margin-top:10px"><button class="act" data-a="like" data-i="${i}" aria-pressed="${f.liked}">${f.liked?'♥':'♡'} ${f.likes}</button>${unknown?'<span class="badge warn">Aguardando identificação da comunidade</span>':`<button class="act" data-a="open" data-id="${s.id}">💬 ${s.com.length+s.q.length}</button><span style="flex:1"></span><button class="act" data-a="open" data-id="${s.id}">Ver espécie</button>`}</div></div></article>`}
+
+function home(){const list=FEED.map((f,i)=>({f,i})).filter(({f})=>S.filter==='Todos'||(f.sp&&sp(f.sp).c===S.filter));
+return `<div class="chips" role="group" aria-label="Filtrar por categoria">${['Todos',...Object.keys(CATS)].map(c=>`<button class="chip" data-a="filter" data-v="${c}" aria-pressed="${S.filter===c}">${c}</button>`).join('')}</div>
+${list.length?list.map(({f,i})=>feedCard(f,i)).join(''):`<div class="empty">Nenhum avistamento de ${S.filter} ainda.<br>Que tal registrar o primeiro?<br><br><button class="btn" data-a="nav" data-v="reg">Registrar avistamento</button></div>`}`}
+
+function catalog(){const q=S.q.toLowerCase();const list=SP.filter(s=>(!S.cat||s.c===S.cat)&&(s.n+s.s).toLowerCase().includes(q));
+return `<label for="busca">Buscar espécie</label><input id="busca" type="search" placeholder="Nome popular ou científico" value="${esc(S.q)}" data-a="search">
+<h2>Categorias</h2><div class="grid">${Object.keys(CATS).map(c=>`<button class="tile" data-a="cat" data-v="${c}" aria-pressed="${S.cat===c}"><span style="font-size:24px">${CATS[c]}</span><b>${c}</b><span class="meta">${SP.filter(s=>s.c===c).length} espécies</span></button>`).join('')}</div>
+<h2>${S.cat||'Todas as espécies'} (${list.length})</h2>
+${list.length?list.map(s=>`<button class="card" style="width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:10px" data-a="open" data-id="${s.id}"><span class="photo" style="width:64px;height:64px;border-radius:12px;font-size:32px;background:${HUE[s.c]}">${s.e}</span><span><b>${s.n}</b><br><i class="meta">${s.s}</i></span></button>`).join(''):`<div class="empty">Nada encontrado para “${esc(S.q)}”.<br>Confira a grafia ou <button class="btn sec" data-a="clear">limpar busca</button></div>`}`}
+
+function questionMessage(s,m,i){const answering=S.replying&&S.replying.sp===s.id&&S.replying.q===i;
+return `<div class="msg"><b>${esc(m.u)}</b><div>${esc(m.t)}</div>${m.a?`<div class="ans"><span class="badge">Respondida</span><div>${esc(m.a)}</div></div>`:`<span class="badge warn">Aguardando resposta</span><button class="btn qa-reply" data-a="reply" data-id="${s.id}" data-q="${i}">Responder</button>${answering?`<div class="reply-form"><label for="reply">Sua resposta</label><textarea id="reply" rows="3" aria-describedby="reply-hint replyerr" placeholder="Escreva uma resposta útil e respeitosa…"></textarea><div class="hint" id="reply-hint">Sua resposta ficará visível para toda a comunidade.</div><div class="err" id="replyerr" role="alert"></div><div class="reply-actions"><button class="btn qa-submit" data-a="sendreply">Publicar resposta</button><button class="btn sec" data-a="cancelreply">Cancelar</button></div></div>`:''}`}</div>`}
+
+function detail(){const s=sp(S.detail);const isC=S.dtab==='com';const items=isC?s.com:s.q;
+return `${photo(s,190)}<h2 style="margin-top:14px">${s.n}</h2><div class="meta"><i>${s.s}</i></div><div class="row" style="margin:8px 0"><span class="badge">${CATS[s.c]} ${s.c}</span><span class="badge">📍 ${s.onde}</span></div><p>${s.info}</p>
+<div class="tabs" role="tablist"><button role="tab" data-a="dtab" data-v="com" aria-selected="${isC}">Comentários (${s.com.length})</button><button role="tab" data-a="dtab" data-v="q" aria-selected="${!isC}">Perguntas (${s.q.length})</button></div>
+${items.length?items.map((m,i)=>isC?`<div class="msg"><b>${esc(m.u)}</b><div>${esc(m.t)}</div></div>`:questionMessage(s,m,i)).join(''):`<div class="empty">${isC?'Ainda sem comentários. Compartilhe o que você observou.':'Nenhuma pergunta ainda. Dúvidas ajudam toda a comunidade.'}</div>`}
+<div class="field" style="margin-top:12px"><label for="msg">${isC?'Seu comentário':'Sua pergunta'}</label><input type="text" id="msg" placeholder="${isC?'Escreva algo útil…':'O que você quer saber?'}"><div class="err" id="merr"></div></div>
+<button class="btn" data-a="send">${isC?'Publicar comentário':'Enviar pergunta'}</button>`}
+
+function register(){const r=S.reg,t=S.touched;const miss=[];if(!r.foto)miss.push('Adicione uma foto');if(!r.p)miss.push('Escolha o local');
+return `<p class="meta" style="margin-top:0">Campos com * são obrigatórios. Não sabe a espécie? A comunidade ajuda a identificar.</p>
+<div class="field"><span class="lbl">Foto *</span><button class="photo-btn ${r.foto?'ok':''}" data-a="foto">${r.foto?'<div><div style="font-size:44px">🖼️</div><b>Foto adicionada</b><div class="meta">Toque para trocar</div></div>':'<div><div style="font-size:36px">📷</div><b>Tirar ou escolher foto</b></div>'}</button>${t&&!r.foto?'<div class="err">Adicione uma foto para publicar.</div>':''}</div>
+<div class="field"><label for="rsp">Espécie</label><select id="rsp" data-a="rsp"><option value="">Não sei identificar</option>${SP.map(s=>`<option value="${s.id}" ${r.sp==s.id?'selected':''}>${s.n}</option>`).join('')}</select></div>
+<div class="field"><label for="rp">Local no campus *</label><select id="rp" data-a="rp"><option value="">Selecione…</option>${PLACES.map(p=>`<option ${r.p===p?'selected':''}>${p}</option>`).join('')}</select>${t&&!r.p?'<div class="err">Escolha onde você viu o animal.</div>':''}</div>
+<div class="field"><label for="rn">Observação (opcional)</label><textarea id="rn" data-a="rn" placeholder="Comportamento, quantidade, horário…">${esc(r.note)}</textarea></div>
+<button class="btn" data-a="publish">Publicar avistamento</button><p class="hint" style="text-align:center">Mantenha distância e não alimente os animais.</p>`}
+
+function qa(){const all=[];SP.forEach(s=>s.q.forEach(m=>all.push({s,m})));const L=all.filter(({m})=>S.qaf==='Todas'||!m.a);
+return `<div class="chips">${['Todas','Sem resposta'].map(c=>`<button class="chip" data-a="qaf" data-v="${c}" aria-pressed="${S.qaf===c}">${c}</button>`).join('')}</div>
+${L.length?L.map(({s,m})=>`<article class="card qa-card"><button class="qa-open" data-a="openq" data-id="${s.id}" data-q="${s.q.indexOf(m)}"><span class="meta">${s.e} ${s.n} · ${esc(m.u)}</span><span class="qa-question">${esc(m.t)}</span><span class="qa-status">${m.a?'<span class="badge">Respondida</span>':'<span class="badge warn">Aguardando resposta</span>'}</span></button>${m.a?'':`<button class="btn qa-reply" data-a="reply" data-id="${s.id}" data-q="${s.q.indexOf(m)}">Responder</button>`}</article>`).join(''):'<div class="empty">Todas as perguntas foram respondidas. 🎉</div>'}`}
+
+const TITLES={home:'Avistamentos',cat:'Catálogo',reg:'Novo avistamento',acc:'Minha conta',qa:'Perguntas e respostas'};
+function account(){
+  return `<div class="account-shell">
+    <div class="account-card">
+      <div class="account-avatar">👤</div>
+      <h2>Conecte-se</h2>
+      <div class="account-meta">Acesse sua conta para salvar favoritos e acompanhar registros.</div>
+    </div>
+    <div class="account-actions">
+      <button class="account-btn primary" data-a="nav" data-v="home">Entrar</button>
+      <button class="account-btn" data-a="nav" data-v="reg">Criar conta</button>
+    </div>
+  </div>`;
+}
+function render(){
+  const d=S.detail;
+  const logo=`<img class="brand-logo" src="imagens/fauna-ufsm-logo.svg" alt="Fauna UFSM">`;
+  $('#hd').innerHTML=d?`<button class="back" data-a="back" aria-label="Voltar">←</button>${logo}<h1>${sp(d).n}</h1>`:`${logo}<h1>${S.tab==='home'?'Fauna UFSM':TITLES[S.tab]}</h1><button class="themebtn" data-a="theme" aria-label="Alternar tema claro/escuro">◐</button>`;
+  $('#view').innerHTML=d?detail():{home,cat:catalog,reg:register,acc:account,qa}[S.tab]();
+  const N=[['home','🏠','Início'],['cat','📖','Catálogo'],['reg','＋','Registrar'],['qa','❓','Perguntas'],['acc','👤','Conta']];
+  $('#nav').innerHTML=N.map(([k,i,l])=>`<button class="${k==='reg'?'reg':''}" data-a="nav" data-v="${k}" ${S.tab===k&&!d?'aria-current="page"':''}><span aria-hidden="true">${i}</span>${l}</button>`).join('');
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+ if(a==='nav'){S.touched=false;go(v)}
+ else if(a==='back'){S.detail=null;render()}
+ else if(a==='open')go(S.tab==='qa'?'qa':S.tab,+b.dataset.id);
+ else if(a==='openq'){S.replying=null;S.dtab='q';go('qa',+b.dataset.id)}
+ else if(a==='reply'){S.tab='qa';S.detail=+b.dataset.id;S.dtab='q';S.replying={sp:+b.dataset.id,q:+b.dataset.q};render();$('#view').scrollTop=0;$('#reply').focus();$('#reply').scrollIntoView({block:'center'})}
+ else if(a==='cancelreply'){S.replying=null;render()}
+ else if(a==='sendreply'){const el=$('#reply'),t=el.value.trim();if(!t){$('#replyerr').textContent='Escreva uma resposta antes de publicar.';el.focus();return}
+   const s=sp(S.replying.sp),m=s.q[S.replying.q];m.a=t;S.replying=null;render();toast('Resposta publicada')}
+ else if(a==='filter'){S.filter=v;render()}
+ else if(a==='qaf'){S.qaf=v;render()}
+ else if(a==='cat'){S.cat=S.cat===v?'':v;render()}
+ else if(a==='clear'){S.q='';S.cat='';render()}
+ else if(a==='dtab'){S.dtab=v;render()}
+ else if(a==='like'){const f=FEED[+b.dataset.i];f.liked=!f.liked;f.likes+=f.liked?1:-1;render()}
+ else if(a==='foto'){S.reg.foto=true;render();toast('Foto adicionada')}
+ else if(a==='send'){const el=$('#msg'),t=el.value.trim();if(!t){$('#merr').textContent='Escreva uma mensagem antes de enviar.';el.focus();return}
+   const s=sp(S.detail);(S.dtab==='com'?s.com:s.q).push(S.dtab==='com'?{u:'Você',t}:{u:'Você',t,a:''});render();toast(S.dtab==='com'?'Comentário publicado':'Pergunta enviada')}
+ else if(a==='publish'){S.touched=true;const r=S.reg;if(!r.foto||!r.p){render();toast('Faltam campos obrigatórios');return}
+   const item={sp:r.sp?+r.sp:null,u:'Você',p:r.p,t:'agora',likes:0,liked:false,note:r.note};
+   if(!r.sp){item.note=(r.note?r.note+' ':'')+'Aguardando identificação da comunidade'}
+   FEED.unshift(item);undo=item;S.reg={foto:false,sp:'',p:'',note:''};S.touched=false;S.filter='Todos';go('home');toast('Avistamento publicado',true)}
+ else if(a==='undo'){FEED=FEED.filter(f=>f!==undo);render();toast('Publicação desfeita')}
+ else if(a==='theme'){const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0D1512';r.dataset.theme=dark?'light':'dark'}
+});
+document.addEventListener('input',e=>{const a=e.target.dataset.a;
+ if(a==='search'){S.q=e.target.value;const p=e.target.selectionStart;render();const n=$('#busca');n.focus();n.setSelectionRange(p,p)}
+ else if(a==='rn')S.reg.note=e.target.value});
+document.addEventListener('change',e=>{const a=e.target.dataset.a;if(a==='rsp'){S.reg.sp=e.target.value}if(a==='rp'){S.reg.p=e.target.value;render()}});
+render();
+</script>
+</body>
+</html>
